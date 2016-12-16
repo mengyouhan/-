@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+from jichu import Chapter
 import requests,re
 import os
 
@@ -10,23 +11,26 @@ titles = soup.select('#chapter li a')
 data = [x['href'] for x in titles]
 data1 = [x['title'] for x in titles]
 yeshus = soup.select('#chapter li')
-data2 = [x.get_text() for x in yeshus]
-pageNum = []
-for y in data2:
-    qq = [x for x in y if x.strip().isdigit()]
-    i = 0
-    ll = ''
-    while i < len(qq):
-        ll += qq[i]
-        i += 1
-        pageNum.append(ll)
-for name,url,page in zip(data1,data,pageNum):
+data2 = [re.compile(r'\d+').search(x.get_text()).group() for x in yeshus]
+# re.compile(r'\d+').search(x.get_text()).group()
+# pageNum = []
+
+
+chapterInfo = []
+for name,url,page in zip(data1,data,data2):
     listof = {
         'name': name,
         'url': url,
-        'page': page
+        'page': int(page)
     }
-
+    chapterInfo.append(listof)
+os.makedirs('/Users/user/desktop/guidao')
+for x in chapterInfo:
+    name = x['name']
+    url = x['url']
+    page = x['page']
+    spider = Chapter(name, url, page)
+    spider.start()
 
 
 
